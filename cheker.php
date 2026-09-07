@@ -82,27 +82,35 @@ function cheker_render_meta_box( $post ) {
     }
 
     $previous_heading_level = null;
+    $heading_issue_found = false;
+    $first_heading_level = null;
 
     foreach ( $blocks as $block ) {
 
         if ( isset( $block['blockName'] ) && $block['blockName'] === 'core/heading' ) {
 
             $level = $block['attrs']['level'] ?? 2;
+            if ( $first_heading_level === null ) {
+                $first_heading_level = $level;
+            }
 
-            echo '<p>Found an H' . esc_html( $level ) . ' heading</p>';
             if (
-                 $previous_heading_level !== null &&
-                 $level > $previous_heading_level + 1
-                ) {
-                    echo '<p>⚠ Heading hierarchy issue: H'
-                    . esc_html( $previous_heading_level )
-                    . ' jumps to H'
-                    . esc_html( $level )
-                    . '</p>';
-                  }
+                $previous_heading_level !== null &&
+                $level > $previous_heading_level + 1
+            ) {
+                $heading_issue_found = true;
+            }
 
                 $previous_heading_level = $level;
-         }
-    }
+          }
+        }
+        if ( $first_heading_level !== null && $first_heading_level !== 1 ) {
+            echo '<p>⚠ First heading is not an H1</p>';
+        }
+        if ( $heading_issue_found ) {
+            echo '<p>⚠ Heading hierarchy issue found</p>';
+        } else {
+            echo '<p>✓ Heading hierarchy looks good</p>';
+        }
 
 }
